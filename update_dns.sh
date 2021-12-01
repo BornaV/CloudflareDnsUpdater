@@ -8,11 +8,11 @@ source /config
 #echo $zone_identifier
 #echo $record_name
 
-auth_email=$auth_email                                      # The email used to login 'htt>
-auth_method=$auth_method                                # Set to "global" for Global API K>
-auth_key=$auth_key                                        # Your API Token or Global API K>
-zone_identifier=$zone_identifier                                 # Can be found in the "Ov>
-record_name=$record_name                                     # Which record you want to be>
+auth_email=$auth_email                                      # The email used to login 'https://dash.cloudflare.com'
+auth_method=$auth_method                                # Set to "global" for Global API Key or "token" for Scoped API Token 
+auth_key=$auth_key                                        # Your API Token or Global API Key
+zone_identifier=$zone_identifier                                 # Can be found in the "Overview" tab of your domain
+record_name=$record_name                                     # Which record you want to be synced
 proxy=$proxy                                        # Set the proxy to true or false
 
 
@@ -41,13 +41,13 @@ fi
 ###########################################
 
 logger "DDNS Updater: Check Initiated"
-record=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_r>
+record=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name" -H "X-Auth-Email: $auth_email" -H "$auth_header $auth_key" -H "Content-Type: application/json")
 
 ###########################################
 ## Check if the domain has an A record
 ###########################################
 if [[ $record == *"\"count\":0"* ]]; then
-  logger -s "DDNS Updater: Record does not exist, perhaps create one first? (${ip} for ${r>
+  logger -s "DDNS Updater: Record does not exist, perhaps create one first? (${ip} for ${record_name})"
   exit 1
 fi
 
@@ -69,21 +69,20 @@ record_identifier=$(echo "$record" | sed -E 's/.*"id":"(\w+)".*/\1/')
 ###########################################
 ## Change the IP@Cloudflare using the API
 ###########################################
-update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_r>
+update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier" \
                      -H "X-Auth-Email: $auth_email" \
                      -H "$auth_header $auth_key" \
                      -H "Content-Type: application/json" \
-              --data "{\"id\":\"$zone_identifier\",\"type\":\"A\",\"proxied\":${proxy},\"n>
+              --data "{\"id\":\"$zone_identifier\",\"type\":\"A\",\"proxied\":${proxy},\"name\":\"$record_name\",\"content\":\"$ip\"}")
 
 ###########################################
 ## Report the status
 ###########################################
 case "$update" in
 *"\"success\":false"*)
-  logger -s "DDNS Updater: $ip $record_name DDNS failed for $record_identifier ($ip). DUMP>
+  logger -s "DDNS Updater: $ip $record_name DDNS failed for $record_identifier ($ip). DUMPING RESULTS:\n$update"
   exit 1;;
 *)
   logger "DDNS Updater: $ip $record_name DDNS updated."
   exit 0;;
 esac
-
