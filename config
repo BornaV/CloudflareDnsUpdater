@@ -1,0 +1,8 @@
+update_rate=2                               #time to wait before next update in seconds
+
+auth_email="example_email@email.com"        # The email used to login 'htt>
+auth_method="global"                        # Set to "global" for Global API K>
+auth_key="set_auth_key"                     # Your API Token or Global API K>
+zone_identifier="set_the_zone_identifier"   # Can be found in the "Ov>
+record_name="enter_the_dns_record_name"     # Which record you want to be>
+proxy=true                                  # Set the proxy to true or false
