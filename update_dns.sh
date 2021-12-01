@@ -2,11 +2,11 @@
 
 source /config
 
-echo $auth_email
-echo $auth_method
-echo $auth_key
-echo $zone_identifier
-echo $record_name
+#echo $auth_email
+#echo $auth_method
+#echo $auth_key
+#echo $zone_identifier
+#echo $record_name
 
 auth_email=$auth_email                                      # The email used to login 'htt>
 auth_method=$auth_method                                # Set to "global" for Global API K>
