@@ -10,5 +10,4 @@
     <build>
         <finalName>CloudflareDnsUpdater</finalName>
     </build>
-
 </project>
